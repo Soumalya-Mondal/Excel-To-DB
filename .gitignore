@@ -17,3 +17,6 @@ wheels/
 
 # Excel File
 **.xlsx
+
+# temp folder
+temp/
