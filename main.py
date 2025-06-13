@@ -54,41 +54,81 @@ if __name__ == '__main__':
     except Exception as error:
         print(f'ERROR - [Excel-To-DB:S05] - {str(error)}')
 
-    # check if ".env" file is present:S05
+    # check if ".env" file is present:S06
     try:
         if (not (env_file_path.exists())):
             print('ERROR - ".env" Not Present, Hence Stop Execution')
             sys.exit(1)
     except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S05] - {str(error)}')
-
-    # fetching all the "excel" or "csv" file from the directory:S06
-    try:
-        # define file extension
-        allowed_file_extension = ['.csv', 'xls', '.xlsx']
-        # find all the files with the spcified extension
-        found_file_list = [str(file_path.resolve()) for file_path in input_folder_path.iterdir() if file_path.suffix.lower() in allowed_file_extension]
-        # check if any files are present
-        if (len(found_file_list) > 0):
-            # print all the files name
-            for file_path in found_file_list:
-                print(f'INFO    - "{Path(file_path).name}" File Found')
-        else:
-            print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
-            sys.exit(1)
-    except Exception as error:
         print(f'ERROR - [Excel-To-DB:S06] - {str(error)}')
 
-    # importing "process_csv" user-define function:S07
+    # creating "account_file_list" table inside database:S07
     try:
-        from support.process_csv import process_csv
+        # define "account_file_list" table create sql query
+        account_file_list_table_create_sql = '''
+        CREATE TABLE account_file_list (
+            id SERIAL PRIMARY KEY,
+            account_name VARCHAR(255) NOT NULL,
+            file_submitted_date TIMESTAMP WITH TIME ZONE NOT NULL,
+            submitted_file_name VARCHAR(255) NOT NULL,
+            file_size_in_byte BIGINT NOT NULL,
+            file_process_status INT NOT NULL CHECK (file_process_status IN (0, 1, 2, 3, 4, 5, 6)),
+            table_name_for_file_data CHAR(16) NOT NULL CHECK (char_length(table_name_for_file_data) = 16),
+            file_type VARCHAR(4) NOT NULL CHECK (LOWER(file_type) IN ('csv', 'xls', 'xlsx'))
+        );
+        ALTER TABLE account_file_list OWNER TO soumalya;'''
+
+        # importing "database_table_create" function:S07-A
+        try:
+            from support.database_table_create import database_table_create
+        except Exception as error:
+            print(f'ERROR - [Excel-To-DB:S07-A] - {str(error)}')
+
+        # calling "database_table_create" user define function:S07-B
+        try:
+            account_file_list_function_response = database_table_create(env_file_path = str(env_file_path), table_name = 'account_file_list', table_create_sql = str(account_file_list_table_create_sql))
+            # check the response
+            if (account_file_list_function_response == None):
+                print(f'ERROR   - "database_table_create" Function Not Executed Proerly, Manual Intervention Is Required')
+                sys.exit(1)
+            else:
+                if (str(account_file_list_function_response['status']).lower() == 'success'):
+                    print(f"SUCCESS - {account_file_list_function_response['message']}")
+                else:
+                    print(f"ERROR   - {account_file_list_function_response['message']}, Hence Stop Execution")
+                    sys.exit(1)
+        except Exception as error:
+            print(f'ERROR - [Excel-To-DB:S07-B] - {str(error)}')
     except Exception as error:
         print(f'ERROR - [Excel-To-DB:S07] - {str(error)}')
 
-    # loop through all the files:S08
-    try:
-        for file_path in found_file_list:
-            # calling "process_csv" function
-            process_csv(temp_folder_path = str(temp_folder_path), file_path = str(file_path))
-    except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S08] - {str(error)}')
+    # # fetching all the "excel" or "csv" file from the directory:S09
+    # try:
+    #     # define file extension
+    #     allowed_file_extension = ['.csv', 'xls', '.xlsx']
+    #     # find all the files with the spcified extension
+    #     found_file_list = [str(file_path.resolve()) for file_path in input_folder_path.iterdir() if file_path.suffix.lower() in allowed_file_extension]
+    #     # check if any files are present
+    #     if (len(found_file_list) > 0):
+    #         # print all the files name
+    #         for file_path in found_file_list:
+    #             print(f'INFO    - "{Path(file_path).name}" File Found')
+    #     else:
+    #         print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
+    #         sys.exit(1)
+    # except Exception as error:
+    #     print(f'ERROR - [Excel-To-DB:S09] - {str(error)}')
+
+    # # importing "process_csv" user-define function:S10
+    # try:
+    #     from support.process_csv import process_csv
+    # except Exception as error:
+    #     print(f'ERROR - [Excel-To-DB:S10] - {str(error)}')
+
+    # # loop through all the files:S11
+    # try:
+    #     for file_path in found_file_list:
+    #         # calling "process_csv" function
+    #         process_csv(temp_folder_path = str(temp_folder_path), file_path = str(file_path))
+    # except Exception as error:
+    #     print(f'ERROR - [Excel-To-DB:S11] - {str(error)}')
