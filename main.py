@@ -75,7 +75,7 @@ if __name__ == '__main__':
             file_path TEXT NOT NULL,
             file_size_in_byte BIGINT NOT NULL,
             file_process_status INT NOT NULL CHECK (file_process_status IN (0, 1, 2, 3, 4, 5, 6)),
-            table_name_for_file_data CHAR(16) NOT NULL CHECK (char_length(table_name_for_file_data) = 16),
+            table_name_for_file_data CHAR(16) NOT NULL UNIQUE CHECK (char_length(table_name_for_file_data) = 16),
             file_type VARCHAR(4) NOT NULL CHECK (LOWER(file_type) IN ('csv', 'xls', 'xlsx'))
         );
         ALTER TABLE account_file_list OWNER TO soumalya;'''
@@ -104,22 +104,46 @@ if __name__ == '__main__':
     except Exception as error:
         print(f'ERROR - [Excel-To-DB:S07] - {str(error)}')
 
-    # # fetching all the "excel" or "csv" file from the directory:S09
-    # try:
-    #     # define file extension
-    #     allowed_file_extension = ['.csv', 'xls', '.xlsx']
-    #     # find all the files with the spcified extension
-    #     found_file_list = [str(file_path.resolve()) for file_path in input_folder_path.iterdir() if file_path.suffix.lower() in allowed_file_extension]
-    #     # check if any files are present
-    #     if (len(found_file_list) > 0):
-    #         # print all the files name
-    #         for file_path in found_file_list:
-    #             print(f'INFO    - "{Path(file_path).name}" File Found')
-    #     else:
-    #         print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
-    #         sys.exit(1)
-    # except Exception as error:
-    #     print(f'ERROR - [Excel-To-DB:S09] - {str(error)}')
+    # fetching all the "excel" or "csv" file from the directory:S09
+    try:
+        # define file extension
+        allowed_file_extension = ['.csv', 'xls', '.xlsx']
+        # find all the files with the spcified extension
+        found_file_list = [str(file_path.resolve()) for file_path in input_folder_path.iterdir() if file_path.suffix.lower() in allowed_file_extension]
+        # check if any files are present
+        if (not (len(found_file_list) > 0)):
+            print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
+            sys.exit(1)
+    except Exception as error:
+        print(f'ERROR - [Excel-To-DB:S09] - {str(error)}')
+
+    # put file details entry into database:S10
+    try:
+        # importing "file_detais_entry_into_db" user-define function:S10-A
+        try:
+            from support.DatabaseHandler.file_details_entry_into_db import file_details_entry_into_db
+        except Exception as error:
+            print(f'ERROR - [Excel-To-DB:S10-A] - {str(error)}')
+
+        # loop through all the files:S10-B
+        try:
+            for file_path in found_file_list:
+                # calling "file_details_entry_into_db" function
+                file_details_entry_into_db_function_response = file_details_entry_into_db(env_file_path = str(env_file_path), input_file_path = str(file_path))
+                # check the response
+                if (file_details_entry_into_db_function_response == None):
+                    print(f'ERROR   - "file_details_entry_into_db" Function Not Executed Proerly, Manual Intervention Is Required')
+                    sys.exit(1)
+                else:
+                    if (str(file_details_entry_into_db_function_response['status']).lower() == 'success'):
+                        print(f"SUCCESS - {file_details_entry_into_db_function_response['message']}")
+                    else:
+                        print(f"{str(file_details_entry_into_db_function_response['status']).upper()} - {file_details_entry_into_db_function_response['message']}, Hence Stop Execution")
+                        sys.exit(1)
+        except Exception as error:
+            print(f'ERROR - [Excel-To-DB:S10-B] - {str(error)}')
+    except Exception as error:
+        print(f'ERROR - [Excel-To-DB:S10] - {str(error)}')
 
     # # importing "process_csv" user-define function:S10
     # try:
