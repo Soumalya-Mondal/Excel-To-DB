@@ -10,7 +10,8 @@ if __name__ == '__main__':
     # define folder and file path:S02
     try:
         parent_folder_path = Path.cwd()
-        input_folder_path = Path(parent_folder_path) / 'input'
+        resource_folder_path = Path(parent_folder_path) / 'resource'
+        input_folder_path = Path(resource_folder_path) / 'input'
         env_file_path = Path(parent_folder_path) / '.env'
         temp_folder_path = Path(parent_folder_path) / 'temp'
     except Exception as error:
@@ -71,6 +72,7 @@ if __name__ == '__main__':
             account_name VARCHAR(255) NOT NULL,
             file_submitted_date TIMESTAMP WITH TIME ZONE NOT NULL,
             submitted_file_name VARCHAR(255) NOT NULL,
+            file_path TEXT NOT NULL,
             file_size_in_byte BIGINT NOT NULL,
             file_process_status INT NOT NULL CHECK (file_process_status IN (0, 1, 2, 3, 4, 5, 6)),
             table_name_for_file_data CHAR(16) NOT NULL CHECK (char_length(table_name_for_file_data) = 16),
@@ -80,7 +82,7 @@ if __name__ == '__main__':
 
         # importing "database_table_create" function:S07-A
         try:
-            from support.database_table_create import database_table_create
+            from support.DatabaseHandler.database_table_create import database_table_create
         except Exception as error:
             print(f'ERROR - [Excel-To-DB:S07-A] - {str(error)}')
 
@@ -95,7 +97,7 @@ if __name__ == '__main__':
                 if (str(account_file_list_function_response['status']).lower() == 'success'):
                     print(f"SUCCESS - {account_file_list_function_response['message']}")
                 else:
-                    print(f"ERROR   - {account_file_list_function_response['message']}, Hence Stop Execution")
+                    print(f"{str(account_file_list_function_response['status']).upper()} - {account_file_list_function_response['message']}, Hence Stop Execution")
                     sys.exit(1)
         except Exception as error:
             print(f'ERROR - [Excel-To-DB:S07-B] - {str(error)}')
