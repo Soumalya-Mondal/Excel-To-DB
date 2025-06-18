@@ -39,31 +39,15 @@ if __name__ == '__main__':
     except Exception as error:
         print(f'ERROR - [Excel-To-DB:S04] - {str(error)}')
 
-    # check if "temp" folder is present:S05
-    try:
-        if ((temp_folder_path.exists()) and (temp_folder_path.is_dir())):
-            print('INFO    - "temp" Folder Already Present\n')
-        else:
-            # creating "temp" folder
-            temp_folder_path.mkdir()
-            # check if "temp" folder created or not
-            if ((temp_folder_path.exists()) and (temp_folder_path.is_dir())):
-                print('SUCCESS - "temp" Folder Created\n')
-            else:
-                print('ERROR   - "temp" Folder Not Created, Hence Stop Execution')
-                sys.exit(1)
-    except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S05] - {str(error)}')
-
-    # check if ".env" file is present:S06
+    # check if ".env" file is present:S05
     try:
         if (not (env_file_path.exists())):
             print('ERROR - ".env" Not Present, Hence Stop Execution')
             sys.exit(1)
     except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S06] - {str(error)}')
+        print(f'ERROR - [Excel-To-DB:S05] - {str(error)}')
 
-    # creating "account_file_list" table inside database:S07
+    # creating "account_file_list" table inside database:S06
     try:
         # define "account_file_list" table create sql query
         account_file_list_table_create_sql = '''
@@ -80,13 +64,13 @@ if __name__ == '__main__':
         );
         ALTER TABLE account_file_list OWNER TO soumalya;'''
 
-        # importing "database_table_create" function:S07-A
+        # importing "database_table_create" function:S06-A
         try:
             from support.DatabaseHandler.database_table_create import database_table_create
         except Exception as error:
-            print(f'ERROR - [Excel-To-DB:S07-A] - {str(error)}')
+            print(f'ERROR - [Excel-To-DB:S06-A] - {str(error)}')
 
-        # calling "database_table_create" user define function:S07-B
+        # calling "database_table_create" user define function:S06-B
         try:
             account_file_list_function_response = database_table_create(env_file_path = str(env_file_path), table_name = 'account_file_list', table_create_sql = str(account_file_list_table_create_sql))
             # check the response
@@ -100,11 +84,11 @@ if __name__ == '__main__':
                     print(f"{str(account_file_list_function_response['status']).upper()} - {account_file_list_function_response['message']}, Hence Stop Execution")
                     sys.exit(1)
         except Exception as error:
-            print(f'ERROR - [Excel-To-DB:S07-B] - {str(error)}')
+            print(f'ERROR - [Excel-To-DB:S06-B] - {str(error)}')
     except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S07] - {str(error)}')
+        print(f'ERROR - [Excel-To-DB:S06] - {str(error)}')
 
-    # fetching all the "excel" or "csv" file from the directory:S09
+    # fetching all the "excel" or "csv" file from the directory:S07
     try:
         # define file extension
         allowed_file_extension = ['.csv', 'xls', '.xlsx']
@@ -115,21 +99,21 @@ if __name__ == '__main__':
             print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
             sys.exit(1)
     except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S09] - {str(error)}')
+        print(f'ERROR - [Excel-To-DB:S07] - {str(error)}')
 
-    # put file details entry into database:S10
+    # put file details entry into database:S08
     try:
-        # importing "file_detais_entry_into_db" user-define function:S10-A
+        # importing "file_detais_entry_into_db" user-define function:S08-A
         try:
             from support.DatabaseHandler.file_details_entry_into_db import file_details_entry_into_db
         except Exception as error:
-            print(f'ERROR - [Excel-To-DB:S10-A] - {str(error)}')
+            print(f'ERROR - [Excel-To-DB:S08-A] - {str(error)}')
 
-        # loop through all the files:S10-B
+        # loop through all the files:S08-B
         try:
             for file_path in found_file_list:
                 # calling "file_details_entry_into_db" function
-                file_details_entry_into_db_function_response = file_details_entry_into_db(env_file_path = str(env_file_path), input_file_path = str(file_path))
+                file_details_entry_into_db_function_response = file_details_entry_into_db(env_file_path = str(env_file_path), input_file_path = str(file_path), account_name = 'Bayer')
                 # check the response
                 if (file_details_entry_into_db_function_response == None):
                     print(f'ERROR   - "file_details_entry_into_db" Function Not Executed Proerly, Manual Intervention Is Required')
@@ -141,9 +125,9 @@ if __name__ == '__main__':
                         print(f"{str(file_details_entry_into_db_function_response['status']).upper()} - {file_details_entry_into_db_function_response['message']}, Hence Stop Execution")
                         sys.exit(1)
         except Exception as error:
-            print(f'ERROR - [Excel-To-DB:S10-B] - {str(error)}')
+            print(f'ERROR - [Excel-To-DB:S08-B] - {str(error)}')
     except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S10] - {str(error)}')
+        print(f'ERROR - [Excel-To-DB:S08] - {str(error)}')
 
     # # importing "process_csv" user-define function:S10
     # try:
