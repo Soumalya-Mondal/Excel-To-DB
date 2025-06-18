@@ -47,7 +47,20 @@ if __name__ == '__main__':
     except Exception as error:
         print(f'ERROR - [Excel-To-DB:S05] - {str(error)}')
 
-    # creating "account_file_list" table inside database:S06
+    # fetching all the "excel" or "csv" file from the directory:S06
+    try:
+        # define file extension
+        allowed_file_extension = ['.csv', 'xls', '.xlsx']
+        # find all the files with the spcified extension
+        found_file_list = [str(file_path.resolve()) for file_path in input_folder_path.iterdir() if file_path.suffix.lower() in allowed_file_extension]
+        # check if any files are present
+        if (not (len(found_file_list) > 0)):
+            print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
+            sys.exit(1)
+    except Exception as error:
+        print(f'ERROR - [Excel-To-DB:S06] - {str(error)}')
+
+    # creating "account_file_list" table inside database:S07
     try:
         # define "account_file_list" table create sql query
         account_file_list_table_create_sql = '''
@@ -64,13 +77,13 @@ if __name__ == '__main__':
         );
         ALTER TABLE account_file_list OWNER TO soumalya;'''
 
-        # importing "database_table_create" function:S06-A
+        # importing "database_table_create" function:S07-A
         try:
             from support.DatabaseHandler.database_table_create import database_table_create
         except Exception as error:
             print(f'ERROR - [Excel-To-DB:S06-A] - {str(error)}')
 
-        # calling "database_table_create" user define function:S06-B
+        # calling "database_table_create" user define function:S07-B
         try:
             account_file_list_function_response = database_table_create(env_file_path = str(env_file_path), table_name = 'account_file_list', table_create_sql = str(account_file_list_table_create_sql))
             # check the response
@@ -84,20 +97,7 @@ if __name__ == '__main__':
                     print(f"{str(account_file_list_function_response['status']).upper()} - {account_file_list_function_response['message']}, Hence Stop Execution")
                     sys.exit(1)
         except Exception as error:
-            print(f'ERROR - [Excel-To-DB:S06-B] - {str(error)}')
-    except Exception as error:
-        print(f'ERROR - [Excel-To-DB:S06] - {str(error)}')
-
-    # fetching all the "excel" or "csv" file from the directory:S07
-    try:
-        # define file extension
-        allowed_file_extension = ['.csv', 'xls', '.xlsx']
-        # find all the files with the spcified extension
-        found_file_list = [str(file_path.resolve()) for file_path in input_folder_path.iterdir() if file_path.suffix.lower() in allowed_file_extension]
-        # check if any files are present
-        if (not (len(found_file_list) > 0)):
-            print('ERROR   - No Files Present Inside "input" Folder, Hence Stop Execution')
-            sys.exit(1)
+            print(f'ERROR - [Excel-To-DB:S07-B] - {str(error)}')
     except Exception as error:
         print(f'ERROR - [Excel-To-DB:S07] - {str(error)}')
 
